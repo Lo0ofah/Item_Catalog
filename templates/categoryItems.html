@@ -1,0 +1,20 @@
+<html>
+  <head>
+
+  </head>
+  <body>
+    <h3>categories</h3>
+    {% for c in categories %}
+      <a href="{{url_for('category', category_name = c.name)}}">{{c.name}}</a>
+      <br/>
+    {% endfor %}
+    <br/>
+    {{category.name}} Items ({{items|length}} items)
+    <br/>
+    {% for i in items %}
+      <a href="{{url_for('itemDescription', category_name = i.category.name, item_name =i.name)}}">{{i.name}}</a> ({{i.category.name}})
+      <br/>
+    {% endfor %}
+    <br/>
+  </body>
+</html>
