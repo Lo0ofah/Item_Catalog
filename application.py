@@ -159,7 +159,10 @@ def gdisconnect():
 def catalog():
     categories = session.query(Category).all()
     latestItems = session.query(Item).order_by(Item.id.desc()).limit(5)
-    return render_template('catalog.html', categories = categories, latestItems = latestItems)
+    if 'username' not in login_session:
+        return render_template('publicCatalog.html', categories = categories, latestItems = latestItems)
+    else:
+        return render_template('catalog.html', categories = categories, latestItems = latestItems)
 
 @app.route('/catalog/<string:category_name>/items')
 def categoryItems(category_name):
@@ -171,7 +174,12 @@ def categoryItems(category_name):
 @app.route('/catalog/<string:category_name>/<string:item_name>')
 def itemDescription(category_name, item_name):
     item = session.query(Item).filter_by(name = item_name).one()
-    return render_template('itemDescription.html', item = item)
+    if 'username' not in login_session:
+        return render_template('puplicItemDescription.html', item = item)
+    else:
+        return render_template('itemDescription.html', item = item)
+
+
 
 
 
