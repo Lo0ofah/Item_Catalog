@@ -5,7 +5,7 @@
   <body>
     <h3>categories</h3>
     {% for c in categories %}
-      <a href="{{url_for('category', category_name = c.name)}}">{{c.name}}</a>
+      <a href="{{url_for('categoryItems', category_name = c.name)}}">{{c.name}}</a>
       <br/>
     {% endfor %}
     <br/>
