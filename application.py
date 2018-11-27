@@ -19,17 +19,20 @@ import json
 from flask import make_response
 import requests
 
+#read client id fron client_secrets.json
 CLIENT_ID = json.loads(
     open('client_secrets.json', 'r').read())['web']['client_id']
 APPLICATION_NAME = "catalog"
 
-
+#database engine
 engine = create_engine('sqlite:///categories.db')
 Base.metadata.bind = engine
 
+#database session
 DBSession = sessionmaker(bind=engine)
 session = DBSession()
 
+#log in to login user
 @app.route('/login')
 def showLogin():
     state = ''.join(random.choice(string.ascii_uppercase + string.digits)
@@ -128,7 +131,7 @@ def gconnect():
     print "done!"
     return output
 
-# DISCONNECT - Revoke a current user's token and reset their login_session
+# google disconnect
 @app.route('/gdisconnect')
 def gdisconnect():
     access_token = login_session.get('access_token')
@@ -169,7 +172,7 @@ def cataloJSON():
            categoriesJSON[categoriesItem]["Item"] = itemsJSON
     return jsonify(Category = categoriesJSON)
 
-
+#home page display all categories and last added items
 @app.route('/')
 @app.route('/catalog')
 def catalog():
@@ -180,6 +183,7 @@ def catalog():
     else:
         return render_template('catalog.html', categories = categories, latestItems = latestItems)
 
+#catalogItems display items that belong to a specific category
 @app.route('/catalog/<string:category_name>/items')
 def categoryItems(category_name):
     categories = session.query(Category).all()
@@ -187,6 +191,7 @@ def categoryItems(category_name):
     items = session.query(Item).filter_by(category_id = category.id).all()
     return render_template('categoryItems.html', categories = categories, category = category, items = items)
 
+#itemDescription display a specific item information
 @app.route('/catalog/<string:category_name>/<string:item_name>')
 def itemDescription(category_name, item_name):
     item = session.query(Item).filter_by(name = item_name).one()
@@ -196,6 +201,7 @@ def itemDescription(category_name, item_name):
     else:
         return render_template('itemDescription.html', item = item)
 
+#newItem add new item
 @app.route('/catalog/new', methods=['GET','POST'])
 def newItem():
     categories = session.query(Category).all()
@@ -213,6 +219,7 @@ def newItem():
         return redirect(url_for('catalog'))
     return render_template('newItem.html', categories = categories)
 
+#editItem edit a specific item
 @app.route('/catalog/<string:item_name>/edit', methods=['GET','POST'])
 def editItem(item_name):
     categories = session.query(Category).all()
@@ -241,6 +248,7 @@ def editItem(item_name):
         return redirect(url_for('itemDescription', category_name = categoryName.name ,item_name = editedItem.name))
     return render_template('editItem.html', categories = categories, editedItem = editedItem , categoryName = categoryName)
 
+#deleteItem delete a specific item
 @app.route('/catalog/<string:item_name>/delete', methods=['GET','POST'])
 def deleteItem(item_name):
     deletedItem = session.query(Item).filter_by(name = item_name).one()
