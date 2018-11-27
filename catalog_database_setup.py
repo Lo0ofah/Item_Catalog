@@ -47,8 +47,9 @@ class Item(Base):
         #Returns object data in easily serializeble format
         return{
         'id':self.id,
-        'name':self.name,
-        'description':self.description
+        'title':self.name,
+        'description':self.description,
+        'cat_id':self.category_id
         }
 
 

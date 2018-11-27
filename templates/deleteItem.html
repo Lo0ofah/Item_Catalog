@@ -3,6 +3,7 @@
 
   </head>
   <body>
+    {% include "header.html" %}
     <h3>Delete Item</h3>
     <form action="{{url_for('deleteItem', item_name = deletedItem.name)}}" enctype='multipart/form-data' method='POST'>
       <p>Are you sure you want delete {{deletedItem.name}}?</p>

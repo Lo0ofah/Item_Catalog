@@ -4,6 +4,7 @@
   </head>
 
   <body>
+    {% include "header.html" %}
     <h3>Edit Item</h3>
     <form action="{{url_for('editItem', item_name = editedItem.name)}}" enctype='multipart/form-data' method = 'POST'>
         <label for="titel">Titel:</label>

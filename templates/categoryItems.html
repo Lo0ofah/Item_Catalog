@@ -3,6 +3,7 @@
 
   </head>
   <body>
+    {% include "header.html" %}
     <h3>categories</h3>
     {% for c in categories %}
       <a href="{{url_for('categoryItems', category_name = c.name)}}">{{c.name}}</a>

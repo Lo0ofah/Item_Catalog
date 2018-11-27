@@ -137,7 +137,7 @@ def gdisconnect():
         response = make_response(json.dumps('Current user not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
         return response
-    print 'In gdisconnect access token is %s', access_token
+    print 'In gdisconnect access token is ', access_token
     print 'User name is: '
     print login_session['username']
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
@@ -158,6 +158,16 @@ def gdisconnect():
         response = make_response(json.dumps('Failed to revoke token for given user.', 400))
         response.headers['Content-Type'] = 'application/json'
         return response
+
+@app.route('/catalog/JSON')
+def cataloJSON():
+    categories = session.query(Category).all()
+    categoriesJSON = [c.serialize for c in categories]
+    for categoriesItem in range(len(categoriesJSON)):
+         itemsJSON = [i.serialize for i in session.query(Item).filter_by(category_id = categoriesJSON[categoriesItem]["id"]).all()]
+         if itemsJSON:
+           categoriesJSON[categoriesItem]["Item"] = itemsJSON
+    return jsonify(Category = categoriesJSON)
 
 
 @app.route('/')
