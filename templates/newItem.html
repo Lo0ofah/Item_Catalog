@@ -7,11 +7,11 @@
     <form action="{{url_for('newItem')}}"  enctype='multipart/form-data' method = 'POST'>
         <label for="titel">Titel:</label>
         <br/>
-        <input type ="text" maxlength="80" name="title">
+        <input type ="text" maxlength="80" name="title" required>
         <br/>
         <label for="description">Description:</label>
         <br/>
-        <textarea maxlength="400" rows="3" name="description"></textarea>
+        <textarea maxlength="400" rows="3" name="description" required></textarea>
         <br/>
         <label for="category">Category</label>
         <br/>

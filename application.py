@@ -1,5 +1,11 @@
-from flask import Flask, render_template, request, redirect
-from flask import url_for, flash, jsonify
+from flask import (
+            Flask,
+            render_template,
+            request,
+            redirect,
+            url_for,
+            flash, jsonify
+            )
 # import for sqlalchemy and database
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -35,6 +41,12 @@ session = DBSession()
 # log in to login user
 @app.route('/login')
 def showLogin():
+    """login user
+     the state is an integer value
+     that generat to distinct a newly created user
+     Return :
+     page for login
+    """
     state = ''.join(random.choice(string.ascii_uppercase + string.digits)
                     for x in xrange(32))
     login_session['state'] = state
@@ -45,6 +57,11 @@ def showLogin():
 # google connection
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
+    """when user log in useing google
+        create access_token
+        save the user information in login_session
+        add user to the database
+    """
     # Validate state token
     if request.args.get('state') != login_session['state']:
         response = make_response(json.dumps('Invalid state parameter.'), 401)
@@ -140,6 +157,7 @@ def gconnect():
 # google disconnect
 @app.route('/gdisconnect')
 def gdisconnect():
+    """log out user and delete his inforamtion from login_session"""
     access_token = login_session.get('access_token')
     if access_token is None:
         print 'Access Token is None'
@@ -150,7 +168,8 @@ def gdisconnect():
     print 'In gdisconnect access token is ', access_token
     print 'User name is: '
     print login_session['username']
-    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % login_session['access_token']
+    url = 'https://accounts.google.com/o/oauth2/revoke?token=%s'\
+          % login_session['access_token']
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
     print 'result is '
@@ -174,115 +193,182 @@ def gdisconnect():
 # JSON
 @app.route('/catalog/JSON')
 def cataloJSON():
+    """return the data as a Json format"""
     categories = session.query(Category).all()
     categoriesJSON = [c.serialize for c in categories]
     for categoriesItem in range(len(categoriesJSON)):
-            itemsJSON = [i.serialize
-                for i in session.query(Item).filter_by(category_id = categoriesJSON[categoriesItem]["id"]).all()]
+            itemsJSON = [i.serialize for i in session.query(Item).filter_by(
+                 category_id=categoriesJSON[categoriesItem]["id"]).all()]
             if itemsJSON:
                 categoriesJSON[categoriesItem]["Item"] = itemsJSON
-    return jsonify(Category = categoriesJSON)
+    return jsonify(Category=categoriesJSON)
 
 
 # home page display all categories and last added items
 @app.route('/')
 @app.route('/catalog')
 def catalog():
+    """
+    get all categories and items from the database and display them
+
+    Returns:
+    if the user log in:
+        page that he can view and add new item
+    if not:
+        page that he only can view the item
+    """
     categories = session.query(Category).all()
     latestItems = session.query(Item).order_by(Item.id.desc()).limit(5)
     if 'username' not in login_session:
-        return render_template('publicCatalog.html', categories = categories, latestItems = latestItems)
+        return render_template('publicCatalog.html',
+                               categories=categories,
+                               latestItems=latestItems)
     else:
-        return render_template('catalog.html', categories = categories, latestItems = latestItems)
+        return render_template('catalog.html',
+                               categories=categories,
+                               latestItems=latestItems)
 
 
 # catalogItems display items that belong to a specific category
 @app.route('/catalog/<string:category_name>/items')
 def categoryItems(category_name):
+    """
+    get all categories and there specific items
+    from the database and display them
+
+    Returns:
+    page that display the items
+    """
     categories = session.query(Category).all()
-    category = session.query(Category).filter_by(name = category_name).one()
-    items = session.query(Item).filter_by(category_id = category.id).all()
-    return render_template('categoryItems.html', categories = categories, category = category, items = items)
+    category = session.query(Category).filter_by(name=category_name).one()
+    items = session.query(Item).filter_by(category_id=category.id).all()
+    return render_template('categoryItems.html', categories=categories,
+                           category=category,
+                           items=items)
 
 
 # itemDescription display a specific item information
 @app.route('/catalog/<string:category_name>/<string:item_name>')
 def itemDescription(category_name, item_name):
-    item = session.query(Item).filter_by(name = item_name).one()
+    """
+    get a specific item form the database and display it With their information
+    Returns:
+    if the user in the creator for this item :
+        page that he can edit and delete the item
+    if not : page that he only can view the item
+    """
+    item = session.query(Item).filter_by(name=item_name).one()
     creator = getUserInfo(item.user_id)
-    if 'username' not in login_session or creator.id != login_session['user_id']:
-        return render_template('puplicItemDescription.html', item = item)
+    if 'username' not in login_session or (
+     creator.id != login_session['user_id']):
+        return render_template('puplicItemDescription.html', item=item)
     else:
-        return render_template('itemDescription.html', item = item)
+        return render_template('itemDescription.html', item=item)
 
 
 # newItem add new item
 @app.route('/catalog/new', methods=['GET', 'POST'])
 def newItem():
+    """
+    create new item to the database
+
+    Returns:
+        on GET and user not login: Page to login
+        on GET and user log in: Page to display a form
+        On POST: get the data from a form and cretae a new item in database
+        thenn redirect to the home page
+    """
     categories = session.query(Category).all()
     if 'username' not in login_session:
         return redirect('/login')
     if request.method == 'POST':
-        category = session.query(Category).filter_by(name=request.form['category']).one()
-        newItem = Item(name = request.form['title'],
-                       description = request.form['description'],
-                       category_id = category.id,
-                       user_id = login_session['user_id'])
+        category = session.query(Category).filter_by(
+                                name=request.form['category']).one()
+        newItem = Item(name=request.form['title'],
+                       description=request.form['description'],
+                       category_id=category.id,
+                       user_id=login_session['user_id'])
         session.add(newItem)
         session.commit()
         flash('New %s  Item Successfully Created' % (newItem.name))
         return redirect(url_for('catalog'))
-    return render_template('newItem.html', categories = categories)
+    return render_template('newItem.html', categories=categories)
 
 
 # editItem edit a specific item
 @app.route('/catalog/<string:item_name>/edit', methods=['GET', 'POST'])
 def editItem(item_name):
+    """
+    edit item and store the change in  database
+
+    Returns:
+        on GET and user not login: alert message
+        on GET and user log in: Page to display a form
+        On POST: get the data from a form and modfiy the item in database
+        thenn redirect to the item page
+    """
     categories = session.query(Category).all()
-    editedItem = session.query(Item).filter_by(name = item_name).one()
-    categoryName = session.query(Category).filter_by(id = editedItem.category_id).one()
+    editedItem = session.query(Item).filter_by(name=item_name).one()
+    categoryName = session.query(Category).filter_by(
+                            id=editedItem.category_id).one()
     if 'username' not in login_session:
         return redirect('/login')
     if editedItem.user_id != login_session['user_id']:
         return """<script>function myFunction(){
-                      alert('You are not authorized to edit this Item. Please create your own Item in order to edit.');
-                                      }
+                         alert('You are not authorized to edit this Item.
+                         Please create your own Item in order to edit.');
+                       }
                   </script>
-                      <body onload='myFunction()'>"""
+                  <body onload='myFunction()'>"""
     if request.method == 'POST':
         if request.form['title']:
             editedItem.name = request.form['title']
         if request.form['description']:
             editedItem.description = request.form['description']
         if request.form['category']:
-            category = session.query(Category).filter_by(name=request.form['category']).one()
+            category = session.query(Category).filter_by(
+                            name=request.form['category']).one()
             editedItem.category_id = category.id
         session.add(editedItem)
         session.commit()
         flash('Menu Item Successfully Edited')
-        newCategory = session.query(Category).filter_by(id = editedItem.category_id).one()
-        return redirect(url_for('itemDescription', category_name = categoryName.name, item_name = editedItem.name))
-    return render_template('editItem.html', categories = categories, editedItem = editedItem, categoryName = categoryName)
+        newCategory = session.query(Category).filter_by(
+                            id=editedItem.category_id).one()
+        return redirect(url_for('itemDescription',
+                        category_name=categoryName.name,
+                        item_name=editedItem.name))
+    return render_template('editItem.html', categories=categories,
+                           editedItem=editedItem, categoryName=categoryName)
 
 
 # deleteItem delete a specific item
 @app.route('/catalog/<string:item_name>/delete', methods=['GET', 'POST'])
 def deleteItem(item_name):
-    deletedItem = session.query(Item).filter_by(name = item_name).one()
+        """
+        delete item from database
+
+        Returns:
+            on GET and user not login: alert message
+            on GET and user log in: Page to display a form
+            On POST: delete the item from database
+            then redirect to the home page
+        """
+    deletedItem = session.query(Item).filter_by(name=item_name).one()
     if 'username' not in login_session:
         return redirect('/login')
-        if deletedItem.user_id != login_session['user_id']:
+    if deletedItem.user_id != login_session['user_id']:
             return """<script>function myFunction(){
-                          alert('You are not authorized to delete this Item. Please create your own Item in order to delete.');
-                                          }
+                          alert('You are not authorized to delete this Item.
+                          Please create your own Item in order to delete.');
+                          }
                       </script>
-                          <body onload='myFunction()'>"""
+                      <body onload='myFunction()'>"""
     if request.method == 'POST':
         session.delete(deletedItem)
         session.commit()
         flash('Item Successfully Deleted')
         return redirect(url_for('catalog'))
-    return render_template('deleteItem.html', deletedItem = deletedItem)
+    return render_template('deleteItem.html', deletedItem=deletedItem)
 
 
 # User Helper Functions
