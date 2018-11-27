@@ -7,8 +7,8 @@
     <br/>
     {{item.description}}
     <br/>
-    <a href="#">Edit</a> |
-    <a href="#">Detete</a>
+    <a href="{{url_for('editItem', item_name = item.name)}}">Edit</a> |
+    <a href="{{url_for('deleteItem', item_name = item.name)}}">Detete</a>
 
   </body>
 </html>

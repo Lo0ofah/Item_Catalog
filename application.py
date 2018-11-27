@@ -111,6 +111,12 @@ def gconnect():
     login_session['picture'] = data['picture']
     login_session['email'] = data['email']
 
+    #see if user exists, if it doesn't make a new one
+    user_id = getUserID(login_session['email'])
+    if not user_id:
+        user_id = createUser(login_session)
+    login_session['user_id'] = user_id
+
     output = ''
     output += '<h1>Welcome, '
     output += login_session['username']
@@ -174,15 +180,96 @@ def categoryItems(category_name):
 @app.route('/catalog/<string:category_name>/<string:item_name>')
 def itemDescription(category_name, item_name):
     item = session.query(Item).filter_by(name = item_name).one()
-    if 'username' not in login_session:
+    creator = getUserInfo(item.user_id)
+    if 'username' not in login_session or creator.id != login_session['user_id'] :
         return render_template('puplicItemDescription.html', item = item)
     else:
         return render_template('itemDescription.html', item = item)
 
+@app.route('/catalog/new', methods=['GET','POST'])
+def newItem():
+    categories = session.query(Category).all()
+    if 'username' not in login_session:
+        return redirect('/login')
+    if request.method == 'POST':
+        category = session.query(Category).filter_by(name=request.form['category']).one()
+        newItem = Item(name = request.form['title'],
+        description = request.form['description'],
+        category_id = category.id,
+        user_id = login_session['user_id'])
+        session.add(newItem)
+        session.commit()
+        flash('New %s  Item Successfully Created' % (newItem.name))
+        return redirect(url_for('catalog'))
+    return render_template('newItem.html', categories = categories)
+
+@app.route('/catalog/<string:item_name>/edit', methods=['GET','POST'])
+def editItem(item_name):
+    categories = session.query(Category).all()
+    editedItem = session.query(Item).filter_by(name = item_name).one()
+    categoryName = session.query(Category).filter_by(id = editedItem.category_id).one()
+    if 'username' not in login_session:
+        return redirect('/login')
+    if editedItem.user_id != login_session['user_id']:
+        return """<script>function myFunction(){
+                      alert('You are not authorized to edit this Item. Please create your own Item in order to edit.');
+                                      }
+                  </script>
+                      <body onload='myFunction()'>"""
+    if request.method == 'POST':
+        if request.form['title']:
+            editedItem.name = request.form['title']
+        if request.form['description']:
+            editedItem.description = request.form['description']
+        if request.form['category']:
+            category = session.query(Category).filter_by(name=request.form['category']).one()
+            editedItem.category_id = category.id
+        session.add(editedItem)
+        session.commit()
+        flash('Menu Item Successfully Edited')
+        newCategory = session.query(Category).filter_by(id = editedItem.category_id).one()
+        return redirect(url_for('itemDescription', category_name = categoryName.name ,item_name = editedItem.name))
+    return render_template('editItem.html', categories = categories, editedItem = editedItem , categoryName = categoryName)
+
+@app.route('/catalog/<string:item_name>/delete', methods=['GET','POST'])
+def deleteItem(item_name):
+    deletedItem = session.query(Item).filter_by(name = item_name).one()
+    if 'username' not in login_session:
+        return redirect('/login')
+        if deletedItem.user_id != login_session['user_id']:
+            return """<script>function myFunction(){
+                          alert('You are not authorized to delete this Item. Please create your own Item in order to delete.');
+                                          }
+                      </script>
+                          <body onload='myFunction()'>"""
+    if request.method == 'POST':
+        session.delete(deletedItem)
+        session.commit()
+        flash('Item Successfully Deleted')
+        return redirect(url_for('catalog'))
+    return render_template('deleteItem.html', deletedItem = deletedItem)
+
+# User Helper Functions
+def createUser(login_session):
+    newUser = User(name=login_session['username'], email=login_session[
+                   'email'], picture=login_session['picture'])
+    session.add(newUser)
+    session.commit()
+    user = session.query(User).filter_by(email=login_session['email']).one()
+    return user.id
 
 
+def getUserInfo(user_id):
+    user = session.query(User).filter_by(id=user_id).one()
+    return user
 
 
+def getUserID(email):
+    try:
+        user = session.query(User).filter_by(email=email).one()
+        return user.id
+    except:
+        return None
 
 if __name__ == '__main__':
     app.secret_key = 'super_secret_key'

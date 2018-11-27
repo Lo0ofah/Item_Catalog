@@ -1,0 +1,29 @@
+<html>
+  <head>
+
+  </head>
+
+  <body>
+    <h3>Add New Item</h3>
+    <form action="{{url_for('newItem')}}"  enctype='multipart/form-data' method = 'POST'>
+        <label for="titel">Titel:</label>
+        <br/>
+        <input type ="text" maxlength="80" name="title">
+        <br/>
+        <label for="description">Description:</label>
+        <br/>
+        <textarea maxlength="400" rows="3" name="description"></textarea>
+        <br/>
+        <label for="category">Category</label>
+        <br/>
+        <select name="category">
+          {% for category in categories %}
+          <option value="{{category.name}}">{{category.name}}</option>
+            {% endfor %}
+        </select>
+        <br/> <br/>
+        <button type="submit" id="create">Create</button>
+
+    </form>
+  </body>
+</html>

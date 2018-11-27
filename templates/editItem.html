@@ -1,0 +1,29 @@
+<html>
+  <head>
+
+  </head>
+
+  <body>
+    <h3>Edit Item</h3>
+    <form action="{{url_for('editItem', item_name = editedItem.name)}}" enctype='multipart/form-data' method = 'POST'>
+        <label for="titel">Titel:</label>
+        <br/>
+        <input type ="text" maxlength="80" name="title" value="{{editedItem.name}}">
+        <br/>
+        <label for="description">Description:</label>
+        <br/>
+        <textarea maxlength="400" rows="3" name="description">{{editedItem.description}}</textarea>
+        <br/>
+        <label for="category">Category</label>
+        <br/>
+        <select name="category">
+          {% for category in categories %}
+          <option value="{{category.name}}" {%if categoryName.name == category.name %} selected {%endif%}> {{category.name}} </option>
+            {% endfor %}
+        </select>
+        <br/> <br/>
+        <button type="submit" id="edit">Edit</button>
+
+    </form>
+  </body>
+</html>
