@@ -1,9 +1,13 @@
-<div>
-  <span>Catalog App</span>
+
+  <div class="row top-menu">
+    <div class="col-6">
+      <p>Catalog App</p>
+    </div>
+    <div class="col-6 text-right">
     {%if 'username' not in session%}
         <a href="{{url_for('showLogin')}}"> Login </a>
         {% else %}
         <a href="{{url_for('gdisconnect')}}"> Logout </a>
         {% endif %}
-  
-</div>
+      </div>
+  </div>

@@ -1,10 +1,8 @@
-<html>
-  <head>
-
-  </head>
-
-  <body>
-    {% include "header.html" %}
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<div class="row content">
+  <div class="col-12">
     <h3>Edit Item</h3>
     <form action="{{url_for('editItem', item_name = editedItem.name)}}" enctype='multipart/form-data' method = 'POST'>
         <label for="titel">Titel:</label>
@@ -23,8 +21,9 @@
             {% endfor %}
         </select>
         <br/> <br/>
-        <button type="submit" id="edit">Edit</button>
+        <input type="submit" value="Edit">
 
     </form>
-  </body>
-</html>
+  </div>
+</div>
+{% endblock %}

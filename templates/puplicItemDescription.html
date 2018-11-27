@@ -1,12 +1,12 @@
-<html>
-  <head>
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
 
-  </head>
-  {% include "header.html" %}
-  <body>
-    {{item.name}}
-    <br/>
+<div class="row content">
+  <div class="col-12">
+    <h3>{{item.name}}</h3>
     {{item.description}}
-    <br/>
-  </body>
-</html>
+    <br/> <br/>
+  </div>
+</div>
+{% endblock %}

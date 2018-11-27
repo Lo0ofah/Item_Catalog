@@ -1,21 +1,24 @@
-<html>
-  <head>
 
-  </head>
-  <body>
-    {% include "header.html" %}
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+
+<div class="row content">
+  <div class="col-4">
     <h3>categories</h3>
     {% for c in categories %}
       <a href="{{url_for('categoryItems', category_name = c.name)}}">{{c.name}}</a>
       <br/>
     {% endfor %}
-    <br/>
-    {{category.name}} Items ({{items|length}} items)
-    <br/>
+    </div>
+    <div class="col-1 vl"></div>
+    <div class="col-7">
+    <h3>{{category.name}} Items ({{items|length}} items)</h3>
     {% for i in items %}
-      <a href="{{url_for('itemDescription', category_name = i.category.name, item_name =i.name)}}">{{i.name}}</a> ({{i.category.name}})
+      <a href="{{url_for('itemDescription', category_name = i.category.name, item_name =i.name)}}">{{i.name}}</a>
+      <span>({{i.category.name}})</span>
       <br/>
     {% endfor %}
-    <br/>
-  </body>
-</html>
+    </div>
+  </div>
+  {% endblock %}

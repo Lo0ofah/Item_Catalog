@@ -1,15 +1,29 @@
-<html>
-  <head>
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<div class = 'flash'>
+		      {% with messages = get_flashed_messages() %}
+      {% if messages %}
 
-  </head>
-  <body>
-    {% include "header.html" %}
-    {{item.name}}
-    <br/>
+        <ul>
+        {% for message in messages %}
+            <li> <strong> {{ message }} </strong> </li>
+        {% endfor %}
+        </ul>
+        {% endif %}
+    {% endwith %}
+
+</div>
+
+<div class="row content">
+  <div class="col-12">
+    <h3>{{item.name}}</h3>
     {{item.description}}
     <br/>
     <a href="{{url_for('editItem', item_name = item.name)}}">Edit</a> |
     <a href="{{url_for('deleteItem', item_name = item.name)}}">Detete</a>
-
-  </body>
-</html>
+    <br/>
+    <br/>
+  </div>
+</div>
+{% endblock %}

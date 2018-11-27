@@ -1,14 +1,14 @@
-<html>
-  <head>
-
-  </head>
-  <body>
-    {% include "header.html" %}
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+<div class="row content">
+  <div class="col-12">
     <h3>Delete Item</h3>
     <form action="{{url_for('deleteItem', item_name = deletedItem.name)}}" enctype='multipart/form-data' method='POST'>
       <p>Are you sure you want delete {{deletedItem.name}}?</p>
-        <button type="submit" id="delete">Delete</button>
+        <input type="submit" value="Delete">
     </form>
+  </div>
+</div>
 
-  </body>
-</html>
+{% endblock %}
