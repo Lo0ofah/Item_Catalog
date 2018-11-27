@@ -28,7 +28,7 @@ It is about building  web application that provides a list of items within a var
 * To create the database run python catalog_database_setup.py
 * To add data into the database run python catalog_data.py
 * To run the python file python application.py
-* open http://localhost:5000
+* open http://localhost:8000
 
 ##JSON Endpoints
 Catalog JSON: /catalog/JSON - lists all categories in the app.
