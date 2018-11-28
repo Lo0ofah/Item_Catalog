@@ -344,15 +344,15 @@ def editItem(item_name):
 # deleteItem delete a specific item
 @app.route('/catalog/<string:item_name>/delete', methods=['GET', 'POST'])
 def deleteItem(item_name):
-        """
-        delete item from database
+    """
+    delete item from database
 
-        Returns:
-            on GET and user not login: alert message
-            on GET and user log in: Page to display a form
-            On POST: delete the item from database
-            then redirect to the home page
-        """
+    Returns:
+        on GET and user not login: alert message
+        on GET and user log in: Page to display a form
+        On POST: delete the item from database
+        then redirect to the home page
+    """
     deletedItem = session.query(Item).filter_by(name=item_name).one()
     if 'username' not in login_session:
         return redirect('/login')
